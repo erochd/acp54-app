@@ -5,6 +5,7 @@ import pickle
 import scipy.optimize as opt
 import os
 import urllib.request
+import joblib
 
 
 # --- Chargement du modèle

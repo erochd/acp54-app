@@ -7,29 +7,24 @@ import os
 import urllib.request  # ✅ ajouté pour le téléchargement depuis Google Drive
 import joblib     
 import requests
+import gdown
 
 # --- Chargement du modèle
-
 @st.cache_resource
 def load_model():
-    file_id = "12BX-CPQoHH6GFhI6XlaDEpwe9bvjjc-Z"  # Remplace par ton vrai ID complet si besoin
-    url = f"https://drive.google.com/uc?export=download&id={file_id}"
+    file_id = "12BX-CPQoHH6GFhI6XlaDEpwe9bvjjc-Z"  # ton vrai ID Google Drive
+    url = f"https://drive.google.com/uc?id={file_id}"
     output_path = "best_model.pkl"
 
-    # Télécharger uniquement si le fichier n'existe pas localement
     if not os.path.exists(output_path):
-        response = requests.get(url)
-        with open(output_path, 'wb') as f:
-            f.write(response.content)
+        gdown.download(url, output_path, quiet=False)
 
-    # Chargement avec pickle (et non joblib)
-    with open(output_path, 'rb') as f:
+    with open(output_path, "rb") as f:
         model = pickle.load(f)
-
     return model
 
-# Utilisation du modèle
 best_model = load_model()
+
 # --- Variables attendues
 # Toutes les variables saisies + ACP29% (non optimisable)
 # --- Valeurs par défaut pour tests

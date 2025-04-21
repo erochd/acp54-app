@@ -78,11 +78,21 @@ def optimize_selected(input_vals, target, model, selected_vars, var_range=0.3):
 
 # --- Interface Streamlit
 st.title("Prédiction et Optimisation – ACP54% sortie Echelons")
-st.markdown("1) Renseignez les valeurs des paramètres ci-dessous.\n"
-            "2) Cliquez sur **Prédire**.\n"
-            "3) Saisissez une cible.\n"
-            "4) Choisissez les variables à optimiser.\n"
-            "5) Cliquez sur **Optimiser** pour voir les ajustements proposés.")
+st.markdown("""
+### 🧪 Étapes d'utilisation
+
+1. **Renseignez les valeurs des paramètres ci-dessous**  
+   _(Des exemples sont préremplis – remplacez-les avec vos propres données)_
+
+2. **Cliquez sur _Prédire_** pour estimer la densité ACP54%.
+
+3. **Saisissez une valeur cible** pour la densité souhaitée.
+
+4. **Sélectionnez les variables à optimiser** parmi celles proposées.
+
+5. **Cliquez sur _Optimiser_** pour obtenir des recommandations d'ajustement.
+""")
+
 
 # --- Formulaire de prédiction
 with st.form("form_pred"):

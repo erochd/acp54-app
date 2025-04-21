@@ -116,7 +116,7 @@ if submit_pred:
 # --- Formulaire d'optimisation
 if 'pred' in st.session_state:
     with st.form("form_opt"):
-        st.subheader("2. Optimisation locale")
+        st.subheader("2. Optimisation des paramètres")
         target = st.number_input("Valeur cible", value=st.session_state.pred)
         to_opt = st.multiselect("Variables à optimiser", OPTIMIZABLE)
         submit_opt = st.form_submit_button("Optimiser les variables")

@@ -12,7 +12,7 @@ import gdown
 # --- Chargement du modèle
 @st.cache_resource
 def load_model():
-    file_id = "12BX-CPQoHH6GFhI6XlaDEpwe9bvjjc-Z"  # ton vrai ID Google Drive
+    file_id = "12BX-CPQoHH6GFhI6XlaDEpwe9bvjjc-Z"  # <- Ton vrai ID ici
     url = f"https://drive.google.com/uc?id={file_id}"
     output_path = "best_model.pkl"
 

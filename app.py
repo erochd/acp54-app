@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import pickle
 import scipy.optimize as opt
+import os
 
 # --- Chargement du modèle
 @st.cache_resource

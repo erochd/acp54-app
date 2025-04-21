@@ -4,6 +4,8 @@ import pandas as pd
 import pickle
 import scipy.optimize as opt
 import os
+import urllib.request
+
 
 # --- Chargement du modèle
 @st.cache_resource

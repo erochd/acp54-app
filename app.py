@@ -9,18 +9,22 @@ import joblib
 
 
 # --- Chargement du modèle
+
+
 @st.cache_resource
 def load_model():
-    file_id = "12BX-CPQoHH6GFhI6XlaDEpwe9bvjjc-Z"  # Remplace par l’ID réel de ton fichier
+    import requests
+
+    file_id = "12BX-CPQoHH6GFhI6XlaDEpwe9bvjjc-Z"  # Remplace avec ton vrai ID
     url = f"https://drive.google.com/uc?export=download&id={file_id}"
     output_path = "best_model.pkl"
-    
-    # Télécharger seulement si le fichier n'existe pas déjà localement
-    if not os.path.exists(output_path):
-        urllib.request.urlretrieve(url, output_path)
-    
-    return joblib.load(output_path)
 
+    if not os.path.exists(output_path):
+        with open(output_path, "wb") as f:
+            response = requests.get(url)
+            f.write(response.content)
+
+    return joblib.load(output_path)
 best_model = load_model()
 
 # --- Variables attendues

@@ -4,8 +4,8 @@ import pandas as pd
 import pickle
 import scipy.optimize as opt
 import os
-import urllib.request
-import joblib
+import urllib.request  # ✅ ajouté pour le téléchargement depuis Google Drive
+import joblib     
 
 
 # --- Chargement du modèle

@@ -78,7 +78,7 @@ def optimize_selected(input_vals, target, model, selected_vars, var_range=0.3):
 
 # --- Interface Streamlit
 st.title("Prédiction et Optimisation – ACP54% sortie Echelons")
-st.markdown("1) Saisissez toutes les variables ci‑dessous.\n"
+st.markdown("1) Renseignez les valeurs des paramètres ci-dessous.\n"
             "2) Cliquez sur **Prédire**.\n"
             "3) Saisissez une cible.\n"
             "4) Choisissez les variables à optimiser.\n"

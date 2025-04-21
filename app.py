@@ -77,11 +77,11 @@ def optimize_selected(input_vals, target, model, selected_vars, var_range=0.3):
     return opt_vals, res.fun
 
 # --- Interface Streamlit
-st.title("🔍 Prédiction et Optimisation")
-st.markdown("### 🎯 Target : **ACP54% sortie Echelons**")
+#st.title("🔍 Prédiction et Optimisation")
+#st.markdown("### 🎯 Target : **ACP54% sortie Echelons**")
 st.markdown("""
 <div style="text-align: center;">
-    <img src="https://raw.githubusercontent.com/ton-utilisateur/ton-repo/main/logo.png" style="height:24px; margin-bottom:6px;">
+    <img src="https://github.com/erochd/acp54-app/blob/main/kofert.jpeg" style="height:24px; margin-bottom:6px;">
     <h1 style="margin-bottom: 0;">Prédiction et Optimisation</h1>
     <h4 style="margin-top: 0; color: grey;">🎯 Target : <em>ACP54% sortie Echelons</em></h4>
 </div>

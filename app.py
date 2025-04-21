@@ -12,14 +12,16 @@ import gdown
 # --- Chargement du modèle
 @st.cache_resource
 def load_model():
-    file_id = "12BX-CPQoHH6GFhI6XlaDEpwe9bvjjc-Z"  # <- Ton vrai ID ici
-    url = f"https://drive.google.com/uc?id={file_id}"
-    output_path = "best_model.pkl"
+    url = "https://huggingface.co/erochd/acp54-app/resolve/main/best_model_y2.pkl"
+    local_path = "best_model_y2.pkl"
 
-    if not os.path.exists(output_path):
-        gdown.download(url, output_path, quiet=False)
+    if not os.path.exists(local_path):
+        with st.spinner("🔄 Téléchargement du modèle depuis Hugging Face..."):
+            response = requests.get(url)
+            with open(local_path, "wb") as f:
+                f.write(response.content)
 
-    with open(output_path, "rb") as f:
+    with open(local_path, "rb") as f:
         model = pickle.load(f)
     return model
 

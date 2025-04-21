@@ -6,14 +6,13 @@ import scipy.optimize as opt
 import os
 import urllib.request  # ✅ ajouté pour le téléchargement depuis Google Drive
 import joblib     
-
+import requests
 
 # --- Chargement du modèle
 
 
 @st.cache_resource
 def load_model():
-    import requests
 
     file_id = "12BX-CPQoHH6GFhI6XlaDEpwe9bvjjc-Z"  # Remplace avec ton vrai ID
     url = f"https://drive.google.com/uc?export=download&id={file_id}"

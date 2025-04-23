@@ -85,10 +85,10 @@ st.markdown("""
 with st.form("form_pred"):
     st.subheader("1. Saisie des variables")
     user = {}
-    cols = st.columns(3)
+    cols = st.columns(4)
     for i, feat in enumerate(ALL_FEATURES):
         default = DEFAULT_INPUTS[feat]
-        user[feat] = cols[i % 3].number_input(feat, value=default, key=feat, format="%.3f")
+        user[feat] = cols[i % 4].number_input(feat, value=default, key=feat, format="%.3f")
     submit_pred = st.form_submit_button("Prédire")
 
 if submit_pred:

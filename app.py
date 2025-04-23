@@ -9,6 +9,15 @@ import requests
 # --- Largeur pleine page ---
 st.set_page_config(layout="wide")
 
+st.markdown("""
+<style>
+/* Réduction de la taille des labels des champs number_input */
+label[data-testid="stMarkdownContainer"] > div {
+    font-size: 10px !important;
+}
+</style>
+""", unsafe_allow_html=True)
+
 
 # --- Chargement du modèle
 @st.cache_resource

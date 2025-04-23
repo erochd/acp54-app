@@ -10,17 +10,17 @@ import requests
 st.set_page_config(layout="wide")
 
 st.markdown("""
-<style>
-/* Réduire la taille des labels (titres au-dessus des champs) */
-div[data-testid="stNumberInput"] label {
-    font-size: 10px !important;
-    line-height: 1.2 !important;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-</style>
+    <style>
+        /* Cibler les labels des champs number_input */
+        div[data-baseweb="input"] > div:first-child {
+            font-size: 10px !important;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+    </style>
 """, unsafe_allow_html=True)
+
 
 
 

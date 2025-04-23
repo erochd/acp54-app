@@ -10,19 +10,19 @@ import requests
 st.set_page_config(layout="wide")
 
 st.markdown("""
-    <style>
-        /* Cibler les labels des champs number_input */
-        div[data-baseweb="input"] > div:first-child {
-            font-size: 10px !important;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-    </style>
+<style>
+/* Réduit la taille du label au-dessus des champs */
+section[data-testid="stForm"] label {
+    font-size: 10px !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+    line-height: 1.2;
+    margin-bottom: 0.2rem;
+}
+</style>
 """, unsafe_allow_html=True)
-
-
-
 
 # --- Chargement du modèle
 @st.cache_resource

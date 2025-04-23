@@ -9,6 +9,19 @@ import requests
 # --- Largeur pleine page ---
 st.set_page_config(layout="wide")
 
+# --- Style pour labels tronqués ---
+st.markdown("""
+<style>
+    label[data-baseweb="form-control-label"] {
+        display: inline-block;
+        max-width: 270px;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    }
+</style>
+""", unsafe_allow_html=True)
+
 # --- Chargement du modèle
 @st.cache_resource
 def load_model():
@@ -88,7 +101,8 @@ with st.form("form_pred"):
     cols = st.columns(4)
     for i, feat in enumerate(ALL_FEATURES):
         default = DEFAULT_INPUTS[feat]
-        user[feat] = cols[i % 4].number_input(feat, value=default, key=feat, format="%.3f")
+        label = f'<span title="{feat}">{feat}</span>'
+        user[feat] = cols[i % 4].number_input(label, value=default, key=feat, format="%.3f", label_visibility="visible")
 
     submit_pred = st.form_submit_button("Prédire")
 

@@ -9,6 +9,28 @@ import requests
 # --- Largeur pleine page ---
 st.set_page_config(layout="wide")
 
+st.markdown("""
+<style>
+/* Réduit la taille de la police pour les champs d'entrée */
+[data-testid="stNumberInput"] input {
+    font-size: 10px;
+    padding: 0.2em 0.4em;
+}
+
+/* Réduit l'espacement global dans les colonnes */
+.css-1kyxreq, .css-1xarl3l {
+    gap: 0.25rem !important;
+}
+
+/* Réduit l'espace entre les sections */
+.css-1cpxqw2 {
+    padding-top: 0.2rem;
+    padding-bottom: 0.2rem;
+}
+</style>
+""", unsafe_allow_html=True)
+
+
 # --- Chargement du modèle
 @st.cache_resource
 def load_model():

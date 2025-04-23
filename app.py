@@ -65,7 +65,7 @@ st.markdown("""
 <div style="display: flex; align-items: center; gap: 1em;">
     <img src="https://raw.githubusercontent.com/erochd/acp54-app/main/kofert.jpeg" style="width:90px; border-radius: 4px;" />
     <div>
-        <h1 style="margin-bottom: 0;">Réglage de la concentration d’acide</h1>
+        <h1 style="margin-bottom: 0;">Smart Assistant for Acid Concentration Control</h1>
         <h4 style="margin-top: 0; color: grey;">🎯 Target : <em>ACP54% sortie Echelons</em></h4>
     </div>
 </div>

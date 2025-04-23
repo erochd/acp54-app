@@ -9,19 +9,6 @@ import requests
 # --- Largeur pleine page ---
 st.set_page_config(layout="wide")
 
-# --- Style pour labels tronqués ---
-st.markdown("""
-<style>
-    label[data-baseweb="form-control-label"] {
-        display: inline-block;
-        max-width: 270px;
-        overflow: hidden;
-        white-space: nowrap;
-        text-overflow: ellipsis;
-    }
-</style>
-""", unsafe_allow_html=True)
-
 # --- Chargement du modèle
 @st.cache_resource
 def load_model():
@@ -99,15 +86,12 @@ with st.form("form_pred"):
     st.subheader("1. Saisie des variables")
     user = {}
     cols = st.columns(4)
-
     for i, feat in enumerate(ALL_FEATURES):
         default = DEFAULT_INPUTS[feat]
-        display_name = feat[:40] + "..." if len(feat) > 43 else feat  # tronqué si long
-
+        display_name = feat[:40] + "..." if len(feat) > 43 else feat
         with cols[i % 4]:
             st.markdown(
-                f'<div title="{feat}" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 250px;">'
-                f'<strong>{display_name}</strong></div>',
+                f'<div title="{feat}" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 250px;"><strong>{display_name}</strong></div>',
                 unsafe_allow_html=True
             )
             user[feat] = st.number_input(
@@ -117,7 +101,14 @@ with st.form("form_pred"):
                 format="%.3f",
                 label_visibility="collapsed"
             )
+    submit_pred = st.form_submit_button("Prédire")
 
+if submit_pred:
+    input_df = pd.DataFrame([user], columns=ALL_FEATURES)
+    pred = best_model.predict(input_df)[0]
+    st.success(f"Prédiction ACP54% sortie Echelons : **{pred:.2f}**")
+    st.session_state.input_df = input_df
+    st.session_state.pred = pred
 
 # --- Formulaire d'optimisation
 if 'pred' in st.session_state:
@@ -135,12 +126,10 @@ if 'pred' in st.session_state:
             'Valeur actuelle': base[to_opt].values,
             'Ajustement brut': opt_vals.values
         })
-
         def with_arrow(row):
             delta = row['Ajustement brut'] - row['Valeur actuelle']
             icon = "🔼" if delta > 0 else "🔽" if delta < 0 else "⏺️"
             return f"{icon} {row['Ajustement brut']:.2f}"
-
         df_out['Ajustement proposé'] = df_out.apply(with_arrow, axis=1)
         df_out.drop(columns=['Ajustement brut'], inplace=True)
         st.subheader("Ajustements proposés")

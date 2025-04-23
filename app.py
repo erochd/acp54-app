@@ -11,12 +11,17 @@ st.set_page_config(layout="wide")
 
 st.markdown("""
 <style>
-/* Réduction de la taille des labels des champs number_input */
-label[data-testid="stMarkdownContainer"] > div {
-    font-size: 8px !important;
+/* Réduire la taille des labels (titres au-dessus des champs) */
+div[data-testid="stNumberInput"] label {
+    font-size: 10px !important;
+    line-height: 1.2 !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 </style>
 """, unsafe_allow_html=True)
+
 
 
 # --- Chargement du modèle

@@ -86,25 +86,9 @@ with st.form("form_pred"):
     st.subheader("1. Saisie des variables")
     user = {}
     cols = st.columns(4)
-    #for i, feat in enumerate(ALL_FEATURES):
-    #    default = DEFAULT_INPUTS[feat]
-    #    user[feat] = cols[i % 4].number_input(feat, value=default, key=feat, format="%.3f")
     for i, feat in enumerate(ALL_FEATURES):
-        default = DEFAULT_INPUTS.get(feat, 0.0)
-        col = cols[i % 4]
-    
-        if feat == "ACP29% entré Echelons":
-            with col:
-                st.markdown(f"""
-                    <div style="background-color: #e0f7ff; padding: 8px; border-radius: 5px;">
-                        <label style="font-weight: bold;">{feat}</label><br>
-                        <input type="number" step="0.0001" name="{feat}" value="{default}" 
-                               id="{feat}" class="stNumberInput" style="width:100%;">
-                    </div>
-                """, unsafe_allow_html=True)
-                user[feat] = default  # Valeur par défaut (tu peux gérer la récup avec JS si besoin)
-        else:
-            user[feat] = col.number_input(f"{feat}", value=default, key=feat, format="%.3f")
+        default = DEFAULT_INPUTS[feat]
+        user[feat] = cols[i % 4].number_input(feat, value=default, key=feat, format="%.3f")
 
     submit_pred = st.form_submit_button("Prédire")
 

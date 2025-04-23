@@ -63,16 +63,16 @@ def optimize_selected(input_vals, target, model, selected_vars, var_range=0.3):
 # --- En-tête
 st.markdown("""
 <div style="display: flex; align-items: center; gap: 1em;">
-    <img src="https://raw.githubusercontent.com/erochd/acp54-app/main/kofert.jpeg" style="width:60px; border-radius: 8px;" />
+    <img src="https://raw.githubusercontent.com/erochd/acp54-app/main/kofert.jpeg" style="width:80px; border-radius: 8px;" />
     <div>
-        <h1 style="margin-bottom: 0;">Prédiction et Optimisation</h1>
+        <h1 style="margin-bottom: 0;">Réglage de la concentration d’acide</h1>
         <h4 style="margin-top: 0; color: grey;">🎯 Target : <em>ACP54% sortie Echelons</em></h4>
     </div>
 </div>
 """, unsafe_allow_html=True)
 
 st.markdown("""
-### 1. Étapes d’utilisation
+### Étapes d’utilisation
 
 1. **Renseignez les valeurs des paramètres ci-dessous** *(Des exemples sont préremplis – remplacez-les avec vos propres données)*
 2. **Cliquez sur _Prédire_** pour estimer la densité ACP54%.

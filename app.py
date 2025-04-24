@@ -95,7 +95,7 @@ with st.form("form_pred"):
                 f'''
                 <div title="{feat}"
                      style="
-                         font-size: 12px;
+                         font-size: 14px;
                          font-weight: 500;
                          white-space: nowrap;
                          overflow: hidden;

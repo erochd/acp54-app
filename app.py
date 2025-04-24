@@ -6,7 +6,7 @@ import scipy.optimize as opt
 import os
 import requests
 
-# --- Largeur pleine page ---
+# --- Pleine page ---
 st.set_page_config(layout="wide")
 
 # --- Chargement du modèle
@@ -25,7 +25,7 @@ def load_model():
 
 best_model = load_model()
 
-# --- Données d’entrée
+# --- Données
 DEFAULT_INPUTS = {
     '604JFIC214.PV - weak phos acid condenst (M3/H)': 51.85,
     '604JTI211.PV - WEAK PHOS ACD CONDST CO0 (DEGC)': 51.815,
@@ -72,7 +72,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 st.markdown("""
-### Étapes d’utilisation
+### 🧪 Étapes d’utilisation
 
 1. **Renseignez les valeurs des paramètres ci-dessous** *(Des exemples sont préremplis – remplacez-les avec vos propres données)*
 2. **Cliquez sur _Prédire_** pour estimer la densité ACP54%.
@@ -89,7 +89,7 @@ with st.form("form_pred"):
     for i, feat in enumerate(ALL_FEATURES):
         default = DEFAULT_INPUTS[feat]
         display_name = feat[:60] + "..." if len(feat) > 63 else feat
-        color = "#e3f2fd" if feat == 'ACP29% entrée Echelons' else "#f9f9f9"
+        color = "#e3f2fd" if feat == 'ACP29% entrée Echelons' else "#f5f5f5"
         with cols[i % 4]:
             st.markdown(
                 f'''
@@ -104,8 +104,7 @@ with st.form("form_pred"):
                          margin-bottom: 4px;
                          background-color: {color};
                          padding: 4px;
-                         border-radius: 4px;
-                     ">
+                         border-radius: 4px;">
                     {display_name}
                 </div>
                 ''',
@@ -143,10 +142,12 @@ if 'pred' in st.session_state:
             'Valeur actuelle': base[to_opt].values,
             'Ajustement brut': opt_vals.values
         })
+
         def with_arrow(row):
             delta = row['Ajustement brut'] - row['Valeur actuelle']
             icon = "🔼" if delta > 0 else "🔽" if delta < 0 else "⏺️"
             return f"{icon} {row['Ajustement brut']:.2f}"
+
         df_out['Ajustement proposé'] = df_out.apply(with_arrow, axis=1)
         df_out.drop(columns=['Ajustement brut'], inplace=True)
         st.subheader("Ajustements proposés")

@@ -103,7 +103,7 @@ with st.form("form_pred"):
     cols = st.columns(4)
     for i, feat in enumerate(ALL_FEATURES):
         default = DEFAULT_INPUTS[feat]
-        display_name = feat[:60] + "..." if len(feat) > 60 else feat
+        display_name = feat[:60] + "..." if len(feat) > 63 else feat
         with cols[i % 4]:
             st.markdown(
                 f'<div title="{feat}" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 250px;"><strong>{display_name}</strong></div>',

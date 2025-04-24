@@ -9,22 +9,6 @@ import requests
 # --- Largeur pleine page ---
 st.set_page_config(layout="wide")
 
-st.markdown("""
-<style>
-/* Réduit la taille du label au-dessus des champs */
-section[data-testid="stForm"] label {
-    font-size: 10px !important;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: block;
-    line-height: 1.2;
-    margin-bottom: 0.2rem;
-}
-</style>
-""", unsafe_allow_html=True)
-
-
 # --- Chargement du modèle
 @st.cache_resource
 def load_model():
@@ -62,7 +46,7 @@ DEFAULT_INPUTS = {
     'ACP29% entrée Echelons': 1260.0
 }
 ALL_FEATURES = list(DEFAULT_INPUTS.keys())
-OPTIMIZABLE = [f for f in ALL_FEATURES if f != 'ACP29% entré Echelons']
+OPTIMIZABLE = [f for f in ALL_FEATURES if f != 'ACP29% entrée Echelons']
 
 # --- Optimisation
 def optimize_selected(input_vals, target, model, selected_vars, var_range=0.3):
@@ -105,9 +89,26 @@ with st.form("form_pred"):
     for i, feat in enumerate(ALL_FEATURES):
         default = DEFAULT_INPUTS[feat]
         display_name = feat[:60] + "..." if len(feat) > 63 else feat
+        color = "#e3f2fd" if feat == 'ACP29% entrée Echelons' else "#f9f9f9"
         with cols[i % 4]:
             st.markdown(
-                f'<div title="{feat}" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 250px;"><strong>{display_name}</strong></div>',
+                f'''
+                <div title="{feat}"
+                     style="
+                         font-size: 12px;
+                         font-weight: 500;
+                         white-space: nowrap;
+                         overflow: hidden;
+                         text-overflow: ellipsis;
+                         max-width: 100%;
+                         margin-bottom: 4px;
+                         background-color: {color};
+                         padding: 4px;
+                         border-radius: 4px;
+                     ">
+                    {display_name}
+                </div>
+                ''',
                 unsafe_allow_html=True
             )
             user[feat] = st.number_input(

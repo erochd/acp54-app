@@ -92,7 +92,7 @@ with st.form("form_pred"):
         display_name = feat[:60] + "..." if len(feat) > 63 else feat
         with cols[i % 4]:
             st.markdown(
-                f'<div title="{feat}" style="font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><strong>{display_name}</strong></div>',
+                f'<div title="{feat}" style="font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><strong>{display_name}</strong></div>',
                 unsafe_allow_html=True
             )
             user[feat] = st.number_input(

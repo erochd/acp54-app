@@ -81,33 +81,18 @@ st.markdown("""
 5. **Cliquez sur _Optimiser_** pour obtenir des recommandations d’ajustement.
 """)
 
-# --- Formulaire de prédiction
+# --- Formulaire de prédiction (simple, sans fond coloré pour les libellés)
 with st.form("form_pred"):
     st.subheader("1. Saisie des variables")
     user = {}
     cols = st.columns(4)
+
     for i, feat in enumerate(ALL_FEATURES):
         default = DEFAULT_INPUTS[feat]
         display_name = feat[:60] + "..." if len(feat) > 63 else feat
-        color = "#e3f2fd" if feat == 'ACP29% entrée Echelons' else "#f5f5f5"
         with cols[i % 4]:
             st.markdown(
-                f'''
-                <div title="{feat}"
-                     style="
-                         font-size: 14px;
-                         font-weight: 500;
-                         white-space: nowrap;
-                         overflow: hidden;
-                         text-overflow: ellipsis;
-                         max-width: 100%;
-                         margin-bottom: 4px;
-                         background-color: {color};
-                         padding: 4px;
-                         border-radius: 4px;">
-                    {display_name}
-                </div>
-                ''',
+                f'<div title="{feat}" style="font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><strong>{display_name}</strong></div>',
                 unsafe_allow_html=True
             )
             user[feat] = st.number_input(
@@ -118,6 +103,7 @@ with st.form("form_pred"):
                 label_visibility="collapsed"
             )
     submit_pred = st.form_submit_button("Prédire")
+
 
 if submit_pred:
     input_df = pd.DataFrame([user], columns=ALL_FEATURES)

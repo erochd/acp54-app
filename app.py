@@ -107,7 +107,13 @@ with st.form("form_pred"):
 
 if submit_pred:
     input_df = pd.DataFrame([user], columns=ALL_FEATURES)
+
+    # 🔒 S'assurer que les colonnes sont dans le bon ordre pour le modèle
+    if hasattr(best_model, 'feature_names_in_'):
+        input_df = input_df[best_model.feature_names_in_]
+
     pred = best_model.predict(input_df)[0]
+
     st.success(f"Prédiction ACP54% sortie Echelons : **{pred:.2f}**")
     st.session_state.input_df = input_df
     st.session_state.pred = pred

@@ -43,7 +43,7 @@ DEFAULT_INPUTS = {
     '604JPIC242.PV - FLASH CHAMBR AD01 (mm/hg)': 131.4,
     '604JPI246.PV - VAPOR TO FSA (mm/hg)': 133.85,
     '604JFIC250.PV - EVA PMP AP05 PHOS.ACID (M3/H)': 10.75,
-    'ACP29% entrée Echelons': 1260.0
+    'ACP29% entré Echelons': 1260.0
 }
 ALL_FEATURES = list(DEFAULT_INPUTS.keys())
 OPTIMIZABLE = [f for f in ALL_FEATURES if f != 'ACP29% entrée Echelons']

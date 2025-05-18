@@ -6,6 +6,7 @@ import scipy.optimize as opt
 import os
 import requests
 import datetime
+import joblib
 
 # --- Pleine page ---
 st.set_page_config(layout="wide")
@@ -29,7 +30,7 @@ def load_model():
         model = joblib.load(f)
     return model
 
-best_model = load_model()
+model = joblib.load(f)
 
 # --- Mapping affichage utilisateur → colonnes du modèle
 display_to_model_units = {

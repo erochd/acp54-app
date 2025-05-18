@@ -25,38 +25,61 @@ def load_model():
 
 best_model = load_model()
 
-# --- Données
-DEFAULT_INPUTS = {
-    '604JFIC214.PV - weak phos acid condenst (M3/H)': 51.85,
-    '604JTI211.PV - WEAK PHOS ACD CONDST CO0 (DEGC)': 51.815,
-    '604JTI208.PV (°C)': 57.1,
-    '604AFI063.PV - 5B STM FRM DISTRIBUTION (T/H)': 24.625,
-    '604APIC066.PV - 5B STM TO DESUPERHEATER (BAR)': 1.975,
-    '604ATI064.PV - 5B STM TO SEPARATOR (DEGC)': 156.07,
-    '604ATI068A.PV - 2BARG STM TO EVAP J (°C)': 130.11,
-    '604JFI221.PV - LP STEAM TO EVA AE02 (T/H)': 19.385,
-    '604JTIC223.PV - LP STM FRM SEPARTOR A (DEGC)': 74.825,
-    '604JPI225.PV (BAR)': -0.49,
-    '604JPI226.PV - EVAP HEATR AE02 (BAR)': -0.03,
-    '604JPI228.PV (BAR)': 1.865,
-    '604JLI241.PV - FLSH CHAMBR AD01 (%)': 103.125,
-    '604JPIC242.PV - FLASH CHAMBR AD01 (mm/hg)': 131.4,
-    '604JPI246.PV - VAPOR TO FSA (mm/hg)': 133.85,
-    '604JFIC250.PV - EVA PMP AP05 PHOS.ACID (M3/H)': 10.75,
-    'ACP29% entré Echelons': 1260.0
+# --- Mapping affichage utilisateur → colonnes du modèle
+display_to_model_units = {
+    'FIC214':       ('FIC214', 'm³/h'),
+    'TI211':        ('TI211', '°C'),
+    'TI208':        ('TI208', '°C'),
+    'FI063':        ('FI063', 'T/h'),
+    'FI221':        ('FI221', 'T/h'),
+    'TIC223':       ('TIC223', '°C'),
+    'PI225':        ('PI225', 'bar'),
+    'PI226':        ('PI226', 'bar'),
+    'PI228':        ('PI228', 'bar'),
+    'TI244':        ('TI244', '°C'),
+    'LI241':        ('LI241', '%'),
+    'PIC242':       ('PIC242', 'mm/hg'),
+    'PI246':        ('PI246', 'mm/hg'),
+    'FIC250':       ('FIC250', 'm³/h'),
+    'ACP29% entrée Echelons': ('ACP29% entré Echelons', ''),   # pas d’unité
+    'Heure_float':  ('Heure_float', '')                        # pas d’unité
 }
-ALL_FEATURES = list(DEFAULT_INPUTS.keys())
-OPTIMIZABLE = [f for f in ALL_FEATURES if f != 'ACP29% entrée Echelons']
+
+# Valeurs par défaut pour interface
+DEFAULT_INPUTS = {
+    'FIC214': 51.85,
+    'TI211': 51.815,
+    'TI208': 57.1,
+    'FI063': 24.625,
+    'FI221': 19.385,
+    'TIC223': 74.825,
+    'PI225': -0.49,
+    'PI226': -0.03,
+    'PI228': 1.865,
+    'TI244': 103.125,
+    'LI241': 131.4,
+    'PIC242': 133.85,
+    'PI246': 133.85,
+    'FIC250': 10.75,
+    'ACP29% entrée Echelons': 1260.0,
+    'Heure_float': 7.00
+}
+
+DISPLAY_FEATURES = list(DEFAULT_INPUTS.keys())
+OPTIMIZABLE = [f for f in DISPLAY_FEATURES if f not in ['ACP29% entrée Echelons', 'Heure_float']]
 
 # --- Optimisation
+
 def optimize_selected(input_vals, target, model, selected_vars, var_range=0.3):
     bounds = [(v * (1 - var_range), v * (1 + var_range)) if v != 0 else (-1, 1)
               for v in input_vals[selected_vars]]
+
     def obj(x):
         tmp = input_vals.copy()
         tmp[selected_vars] = x
         pred = model.predict(pd.DataFrame([tmp]))[0]
         return abs(pred - target)
+
     res = opt.differential_evolution(obj, bounds, maxiter=50, polish=True)
     return pd.Series(res.x, index=selected_vars), res.fun
 
@@ -72,58 +95,72 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 st.markdown("""
-### 🧪 Étapes d’utilisation
+### 🧪 Étapes d'utilisation
 
 1. **Renseignez les valeurs des paramètres ci-dessous** *(Des exemples sont préremplis – remplacez-les avec vos propres données)*
 2. **Cliquez sur _Prédire_** pour estimer la densité ACP54%.
 3. **Saisissez une valeur cible** pour la densité souhaitée.
 4. **Sélectionnez les variables à optimiser** parmi celles proposées.
-5. **Cliquez sur _Optimiser_** pour obtenir des recommandations d’ajustement.
+5. **Cliquez sur _Optimiser_** pour obtenir des recommandations d'ajustement.
 """)
 
-# --- Formulaire de prédiction (simple, sans fond coloré pour les libellés)
+# --- Formulaire de prédiction
 with st.form("form_pred"):
     st.subheader("1. Saisie des variables")
-    user = {}
+    user_display = {}
     cols = st.columns(4)
 
-    for i, feat in enumerate(ALL_FEATURES):
-        default = DEFAULT_INPUTS[feat]
-        display_name = feat[:60] + "..." if len(feat) > 63 else feat
-        with cols[i % 4]:
-            st.markdown(
-                f'<div title="{feat}" style="font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><strong>{display_name}</strong></div>',
-                unsafe_allow_html=True
-            )
-            user[feat] = st.number_input(
-                label=feat,
-                value=default,
-                key=feat,
-                format="%.3f",
-                label_visibility="collapsed"
-            )
+    # Créer display_to_model à partir de display_to_model_units
+    display_to_model = {k: v[0] for k, v in display_to_model_units.items()}
+
+    for i, feat in enumerate(DISPLAY_FEATURES):
+        if feat != "Heure_float":
+            default = DEFAULT_INPUTS[feat]
+            label_model, unit = display_to_model_units[feat]
+            label_text = f"{feat} ({unit})" if unit else feat
+            with cols[i % 4]:
+                user_display[feat] = st.number_input(label=label_text, value=default, key=feat)
+
+    # Ajouter cellule Heure dans les colonnes pour homogénéité visuelle
+    with cols[len(DISPLAY_FEATURES) % 4]:
+        heure_saisie = st.time_input("Heure de la mesure", value=datetime.time(7, 0))
+    user_display['Heure_float'] = heure_saisie.hour + heure_saisie.minute / 60
+
     submit_pred = st.form_submit_button("Prédire")
 
-
 if submit_pred:
-    input_df = pd.DataFrame([user], columns=ALL_FEATURES)
+    # Mapping nom affichage -> nom attendu par le modèle
+    user_input = {display_to_model[k]: v for k, v in user_display.items()}
+    input_df = pd.DataFrame([user_input])
 
-    # 🔒 S'assurer que les colonnes sont dans le bon ordre pour le modèle
     if hasattr(best_model, 'feature_names_in_'):
         input_df = input_df[best_model.feature_names_in_]
 
     pred = best_model.predict(input_df)[0]
-
     st.success(f"Prédiction ACP54% sortie Echelons : **{pred:.2f}**")
     st.session_state.input_df = input_df
     st.session_state.pred = pred
 
-# --- Formulaire d'optimisation
+
+# --- Optimisation
 if 'pred' in st.session_state:
+
+    # Mapping pour affichage des variables avec unité
+    optim_display_labels = {
+        f"{feat} ({display_to_model_units[feat][1]})" if display_to_model_units[feat][1] else feat: feat
+        for feat in OPTIMIZABLE
+    }
+
     with st.form("form_opt"):
         st.subheader("2. Optimisation des paramètres")
         target = st.number_input("Valeur cible", value=st.session_state.pred)
-        to_opt = st.multiselect("Variables à optimiser", OPTIMIZABLE)
+
+        opt_selected_display = st.multiselect(
+            "Variables à optimiser",
+            list(optim_display_labels.keys())
+        )
+        to_opt = [optim_display_labels[k] for k in opt_selected_display]
+
         submit_opt = st.form_submit_button("Optimiser les variables")
 
     if submit_opt:
@@ -138,10 +175,16 @@ if 'pred' in st.session_state:
         def with_arrow(row):
             delta = row['Ajustement brut'] - row['Valeur actuelle']
             icon = "🔼" if delta > 0 else "🔽" if delta < 0 else "⏺️"
-            return f"{icon} {row['Ajustement brut']:.2f}"
+            return f"{icon} {row['Ajustement brut']:.2f}"
 
         df_out['Ajustement proposé'] = df_out.apply(with_arrow, axis=1)
         df_out.drop(columns=['Ajustement brut'], inplace=True)
+
+        # ✅ Ajout des unités dans la colonne 'Variable'
+        df_out['Variable'] = df_out['Variable'].apply(
+            lambda x: f"{x} ({display_to_model_units[x][1]})" if display_to_model_units[x][1] else x
+        )
+
         st.subheader("Ajustements proposés")
         st.table(df_out)
-        st.info(f"Erreur finale |prédiction–cible| : {err:.2f}")
+        st.info(f"Ecart final |prédiction–cible| : {err:.2f}")

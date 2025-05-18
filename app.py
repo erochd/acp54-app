@@ -13,7 +13,7 @@ st.set_page_config(layout="wide")
 # --- Chargement du modèle
 @st.cache_resource
 def load_model():
-    url = "https://huggingface.co/erochd/acp54-app/resolve/main/best_modele_acide_vH.pkl"
+    url = "https://huggingface.co/erochd/acp54-app/blob/main/best_modele_acide_vH.pkl"
     local_path = "best_model_y2.pkl"
     if not os.path.exists(local_path):
         with st.spinner("🔄 Téléchargement du modèle depuis Hugging Face..."):

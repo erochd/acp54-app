@@ -130,17 +130,28 @@ with st.form("form_pred"):
     submit_pred = st.form_submit_button("Prédire")
 
 if submit_pred:
-    # Mapping nom affichage -> nom attendu par le modèle
+    # Reconstruire le mapping simple
+    display_to_model = {k: v[0] for k, v in display_to_model_units.items()}
+
+    # Créer le dictionnaire d’entrée pour le modèle
     user_input = {display_to_model[k]: v for k, v in user_display.items()}
     input_df = pd.DataFrame([user_input])
 
+    # Vérification des colonnes attendues par le modèle
     if hasattr(best_model, 'feature_names_in_'):
-        input_df = input_df[best_model.feature_names_in_]
+        expected_cols = list(best_model.feature_names_in_)
+        missing_cols = set(expected_cols) - set(input_df.columns)
+        if missing_cols:
+            st.error(f"⛔ Erreur : colonnes manquantes dans l'entrée : {missing_cols}")
+        else:
+            input_df = input_df[expected_cols]
+            pred = best_model.predict(input_df)[0]
+            st.success(f"Prédiction ACP54% sortie Echelons : **{pred:.2f}**")
+            st.session_state.input_df = input_df
+            st.session_state.pred = pred
+    else:
+        st.warning("⚠️ Le modèle ne contient pas d’attribut 'feature_names_in_'")
 
-    pred = best_model.predict(input_df)[0]
-    st.success(f"Prédiction ACP54% sortie Echelons : **{pred:.2f}**")
-    st.session_state.input_df = input_df
-    st.session_state.pred = pred
 
 
 # --- Optimisation

@@ -130,9 +130,6 @@ with st.form("form_pred"):
     submit_pred = st.form_submit_button("Prédire")
 
 if submit_pred:
-    # Reconstruire le mapping simple
-    display_to_model = {k: v[0] for k, v in display_to_model_units.items()}
-
     # Mapping nom affichage -> nom attendu par le modèle
     user_input = {display_to_model[k]: v for k, v in user_display.items()}
     input_df = pd.DataFrame([user_input])
@@ -144,7 +141,6 @@ if submit_pred:
     st.success(f"Prédiction ACP54% sortie Echelons : **{pred:.2f}**")
     st.session_state.input_df = input_df
     st.session_state.pred = pred
-
 
 
 # --- Optimisation

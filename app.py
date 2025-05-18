@@ -11,26 +11,33 @@ import joblib
 # --- Pleine page ---
 st.set_page_config(layout="wide")
 
-# --- Chargement du modèle
-
+# --- Chargement du modèle depuis Hugging Face ---
 @st.cache_resource
 def load_model():
-    url = "https://huggingface.co/erochd/acp54-app/resolve/main/best_modele_acide_vH.pkl"
-    local_path = "best_modele_acide_vH.pkl"
+    url = "https://huggingface.co/erochd/acp54-app/resolve/main/best_modele_acide_vH_fixed.pkl"
+    local_path = "best_modele_acide_vH_fixed.pkl"
 
-    # Télécharger une seule fois
+    # Télécharger une seule fois le fichier si pas encore en local
     if not os.path.exists(local_path):
         with st.spinner("🔄 Téléchargement du modèle depuis Hugging Face..."):
             response = requests.get(url)
-            response.raise_for_status()  # en cas d'erreur HTTP
+            response.raise_for_status()  # Lève une erreur HTTP si le lien est invalide
             with open(local_path, "wb") as f:
                 f.write(response.content)
 
-    with open(local_path, "rb") as f:
-        model = joblib.load(f)
+    # Charger le modèle avec gestion d’erreur
+    try:
+        with open(local_path, "rb") as f:
+            model = joblib.load(f)
+    except Exception as e:
+        st.error(f"❌ Échec du chargement du modèle : {e}")
+        st.stop()
+
     return model
 
-model = joblib.load(f)
+# --- Instanciation du modèle (hors fonction) ---
+best_model = load_model()
+
 
 # --- Mapping affichage utilisateur → colonnes du modèle
 display_to_model_units = {

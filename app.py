@@ -124,7 +124,7 @@ with st.form("form_pred"):
 
     # Ajouter cellule Heure dans les colonnes pour homogénéité visuelle
     with cols[len(DISPLAY_FEATURES) % 4]:
-        heure_saisie = st.time_input("Heure de la mesure", value=datetime.time(7, 0))
+        heure_saisie = st.time_input("Heure de la mesure", value=time(7, 0))
     user_display['Heure_float'] = heure_saisie.hour + heure_saisie.minute / 60
 
     submit_pred = st.form_submit_button("Prédire")

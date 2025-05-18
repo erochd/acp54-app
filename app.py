@@ -11,17 +11,22 @@ import datetime
 st.set_page_config(layout="wide")
 
 # --- Chargement du modèle
+
 @st.cache_resource
 def load_model():
-    url = "https://huggingface.co/erochd/acp54-app/blob/main/best_modele_acide_vH.pkl"
-    local_path = "best_model_y2.pkl"
+    url = "https://huggingface.co/erochd/acp54-app/resolve/main/best_modele_acide_vH.pkl"
+    local_path = "best_modele_acide_vH.pkl"
+
+    # Télécharger une seule fois
     if not os.path.exists(local_path):
         with st.spinner("🔄 Téléchargement du modèle depuis Hugging Face..."):
             response = requests.get(url)
+            response.raise_for_status()  # en cas d'erreur HTTP
             with open(local_path, "wb") as f:
                 f.write(response.content)
+
     with open(local_path, "rb") as f:
-        model = pickle.load(f)
+        model = joblib.load(f)
     return model
 
 best_model = load_model()

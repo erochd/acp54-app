@@ -14,8 +14,8 @@ st.set_page_config(layout="wide")
 # --- Chargement du modèle depuis Hugging Face ---
 @st.cache_resource
 def load_model():
-    url = "https://huggingface.co/erochd/acp54-app/resolve/main/best_modele_acide_vH_fixed.pkl"
-    local_path = "best_modele_acide_vH_fixed.pkl"
+    url = "https://huggingface.co/erochd/acp54-app/resolve/main/best_modele_acide_light_vf.pkl"
+    local_path = "best_modele_acide_light_vf.pkl"
 
     # Télécharger une seule fois le fichier si pas encore en local
     if not os.path.exists(local_path):
@@ -41,38 +41,22 @@ best_model = load_model()
 
 # --- Mapping affichage utilisateur → colonnes du modèle
 display_to_model_units = {
-    'FIC214':       ('FIC214', 'm³/h'),
-    'TI211':        ('TI211', '°C'),
-    'TI208':        ('TI208', '°C'),
-    'FI063':        ('FI063', 'T/h'),
-    'FI221':        ('FI221', 'T/h'),
-    'TIC223':       ('TIC223', '°C'),
-    'PI225':        ('PI225', 'bar'),
-    'PI226':        ('PI226', 'bar'),
-    'PI228':        ('PI228', 'bar'),
-    'TI244':        ('TI244', '°C'),
-    'LI241':        ('LI241', '%'),
-    'PIC242':       ('PIC242', 'mm/hg'),
-    'PI246':        ('PI246', 'mm/hg'),
-    'FIC250':       ('FIC250', 'm³/h'),
-    'ACP29% entrée Echelons': ('ACP29% entré Echelons', ''),   # pas d’unité
-    'Heure_float':  ('Heure_float', '')                        # pas d’unité
+    'TIC223': ('TIC223', '°C'),
+    'PI226': ('PI226', 'bar'),
+    'PI228': ('PI228', 'bar'),
+    'TI244': ('TI244', '°C'),
+    'PI246': ('PI246', 'mm/hg'),
+    'FIC250': ('FIC250', 'm³/h'),
+    'ACP29% entrée Echelons': ('ACP29% entré Echelons', ''),
+    'Heure_float': ('Heure_float', '')
 }
 
 # Valeurs par défaut pour interface
 DEFAULT_INPUTS = {
-    'FIC214': 51.85,
-    'TI211': 51.815,
-    'TI208': 57.1,
-    'FI063': 24.625,
-    'FI221': 19.385,
     'TIC223': 74.825,
-    'PI225': -0.49,
     'PI226': -0.03,
     'PI228': 1.865,
     'TI244': 103.125,
-    'LI241': 131.4,
-    'PIC242': 133.85,
     'PI246': 133.85,
     'FIC250': 10.75,
     'ACP29% entrée Echelons': 1260.0,

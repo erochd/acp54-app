@@ -7,6 +7,7 @@ import os
 import requests
 import datetime
 import joblib
+import time
 
 # --- Pleine page ---
 st.set_page_config(layout="wide")
@@ -173,13 +174,28 @@ if 'pred' in st.session_state:
         submit_opt = st.form_submit_button("Optimiser les variables")
 
     if submit_opt:
-        base = st.session_state.input_df.iloc[0]
-        opt_vals, err = optimize_selected(base, target, best_model, to_opt)
+        with st.spinner("🔄 Optimisation en cours... cela peut prendre quelques secondes"):
+            progress_bar = st.progress(0)
+    
+            # Simulation de progression
+            import time
+            for percent_complete in range(0, 100, 10):
+                time.sleep(0.05)
+                progress_bar.progress(percent_complete + 10)
+    
+            # Exécution de l'optimisation
+            base = st.session_state.input_df.iloc[0]
+            opt_vals, err = optimize_selected(base, target, best_model, to_opt)
+    
+            progress_bar.empty()
+    
+        # Traitement post-optimisation (hors spinner)
         df_out = pd.DataFrame({
             'Variable': to_opt,
             'Valeur actuelle': base[to_opt].values,
             'Ajustement brut': opt_vals.values
         })
+
 
         def with_arrow(row):
             delta = row['Ajustement brut'] - row['Valeur actuelle']

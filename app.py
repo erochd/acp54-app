@@ -19,7 +19,7 @@ echelon = st.sidebar.selectbox("Sélectionnez l’échelon :", ["J", "K", "L"])
 # --- URLs modèles ---
 MODEL_URLS = {
     "J": "https://huggingface.co/erochd/acp54-app/resolve/main/best_modele_acide_light_vf.pkl",
-    "K": "https://huggingface.co/erochd/acp54-app/resolve/main/best_modele_acide_K_v2.pkl",
+    "K": "https://huggingface.co/erochd/acp54-app/resolve/main/best_modele_acide_K.pkl",
     "L": "https://huggingface.co/erochd/acp54-app/resolve/main/best_modele_acide_L.pkl",
 }
 

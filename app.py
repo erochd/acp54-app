@@ -42,22 +42,36 @@ FEATURES = {
     }
 }
 
-# --- Téléchargement et chargement du modèle (bundle) ---
-def load_bundle(url, local_filename):
+# --- Téléchargement et chargement du modèle ---
+def load_model(url, local_filename, echelon):
     if not os.path.exists(local_filename):
         with st.spinner("🔄 Téléchargement du modèle depuis Hugging Face..."):
             response = requests.get(url)
             response.raise_for_status()
             with open(local_filename, "wb") as f:
                 f.write(response.content)
-    return joblib.load(local_filename)
+
+    obj = joblib.load(local_filename)
+
+    if isinstance(obj, dict):  # cas K (bundle)
+        best_model = obj["model"]
+        expected_cols = obj["feature_names"]
+    else:  # cas L (pipeline direct)
+        best_model = obj
+        try:
+            expected_cols = list(best_model.feature_names_in_)
+        except AttributeError:
+            # fallback manuel si le modèle n’a pas gardé les noms
+            if echelon == "L":
+                expected_cols = ['TIC423', 'PI426', 'PI428', 'TI444', 'PI446', 'ACP29%', 'Heure_float']
+            else:
+                expected_cols = ['TIC323', 'PI326', 'PI328', 'TI344', 'PI346', 'ACP29%', 'Heure_float']
+
+    return best_model, expected_cols
 
 model_url = MODEL_URLS[echelon]
 local_path = os.path.basename(model_url)
-
-bundle = load_bundle(model_url, local_path)
-best_model = bundle["model"]
-expected_cols = bundle["feature_names"]
+best_model, expected_cols = load_model(model_url, local_path, echelon)
 
 # --- Harmonisation ACP29 ---
 def harmonize_acp29_column(input_df: pd.DataFrame, expected_cols: list) -> pd.DataFrame:

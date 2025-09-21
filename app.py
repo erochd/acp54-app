@@ -1,5 +1,12 @@
 import streamlit as st
 import joblib, requests, os
+import warnings
+from sklearn.exceptions import InconsistentVersionWarning
+warnings.filterwarnings("ignore", category=InconsistentVersionWarning)
+
+import gc
+gc.collect()
+
 
 # --- Page ---
 st.set_page_config(layout="wide")

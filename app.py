@@ -42,21 +42,22 @@ FEATURES = {
     }
 }
 
-# --- Chargement dynamique du modèle ---
-@st.cache_resource
-def load_model(url, local_filename):
+# --- Téléchargement et chargement du modèle (bundle) ---
+def load_bundle(url, local_filename):
     if not os.path.exists(local_filename):
         with st.spinner("🔄 Téléchargement du modèle depuis Hugging Face..."):
             response = requests.get(url)
             response.raise_for_status()
             with open(local_filename, "wb") as f:
                 f.write(response.content)
-    with open(local_filename, "rb") as f:
-        return joblib.load(f)
+    return joblib.load(local_filename)
 
 model_url = MODEL_URLS[echelon]
 local_path = os.path.basename(model_url)
-best_model = load_model(model_url, local_path)
+
+bundle = load_bundle(model_url, local_path)
+best_model = bundle["model"]
+expected_cols = bundle["feature_names"]
 
 # --- Harmonisation ACP29 ---
 def harmonize_acp29_column(input_df: pd.DataFrame, expected_cols: list) -> pd.DataFrame:
@@ -129,23 +130,19 @@ with st.form("form_pred"):
 
 if submit_pred:
     input_df = pd.DataFrame([user_display])
-    if hasattr(best_model, 'feature_names_in_'):
-        expected_cols = list(best_model.feature_names_in_)
 
-        # ✅ Harmonisation des noms ACP29
-        input_df = harmonize_acp29_column(input_df, expected_cols)
+    # ✅ Harmonisation des noms ACP29
+    input_df = harmonize_acp29_column(input_df, expected_cols)
 
-        missing_cols = set(expected_cols) - set(input_df.columns)
-        if missing_cols:
-            st.error(f"⛔ Erreur : colonnes manquantes dans l'entrée : {missing_cols}")
-        else:
-            input_df = input_df[expected_cols]
-            pred = best_model.predict(input_df)[0]
-            st.success(f"Prédiction ACP54% sortie Echelon {echelon} : **{pred:.2f}**")
-            st.session_state.input_df = input_df
-            st.session_state.pred = pred
+    missing_cols = set(expected_cols) - set(input_df.columns)
+    if missing_cols:
+        st.error(f"⛔ Erreur : colonnes manquantes dans l'entrée : {missing_cols}")
     else:
-        st.warning("⚠️ Le modèle ne contient pas d’attribut 'feature_names_in_'")
+        input_df = input_df[expected_cols]
+        pred = best_model.predict(input_df)[0]
+        st.success(f"Prédiction ACP54% sortie Echelon {echelon} : **{pred:.2f}**")
+        st.session_state.input_df = input_df
+        st.session_state.pred = pred
 
 # --- Optimisation ---
 if 'pred' in st.session_state:

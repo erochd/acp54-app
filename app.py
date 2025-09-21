@@ -53,7 +53,7 @@ def load_model(url, local_filename, echelon):
 
     obj = joblib.load(local_filename)
 
-    if isinstance(obj, dict):  # cas K (bundle)
+    if isinstance(obj, dict):  # cas K (bundle dict)
         best_model = obj["model"]
         expected_cols = obj["feature_names"]
     else:  # cas L (pipeline direct)
@@ -61,7 +61,6 @@ def load_model(url, local_filename, echelon):
         try:
             expected_cols = list(best_model.feature_names_in_)
         except AttributeError:
-            # fallback manuel si le modèle n’a pas gardé les noms
             if echelon == "L":
                 expected_cols = ['TIC423', 'PI426', 'PI428', 'TI444', 'PI446', 'ACP29%', 'Heure_float']
             else:
@@ -88,28 +87,41 @@ DEFAULT_INPUTS = FEATURES[echelon]
 DISPLAY_FEATURES = list(DEFAULT_INPUTS.keys())
 OPTIMIZABLE = [f for f in DISPLAY_FEATURES if f not in ['ACP29% entré Echelons', 'ACP29%', 'Heure_float']]
 
-# --- Optimisation ---
-def optimize_selected(input_vals, target, model, selected_vars, var_range=0.3):
-    if not selected_vars:
-        raise ValueError("Aucune variable sélectionnée pour l’optimisation.")
+# --- Optimisation avec bornes fixes ---
+def optimize_selected(input_vals, target, model, selected_vars):
+    # Bornes spécifiques pour K et L
+    custom_bounds = {
+        # Pour K
+        'TIC323': (70, 90),
+        'PI326': (-1, 2),
+        'PI328': (0.5, 3),
+        'TI344': (60, 120),
+        'PI346': (50, 200),
+        # Pour L
+        'TIC423': (70, 90),
+        'PI426': (-1, 2),
+        'PI428': (0.5, 3),
+        'TI444': (60, 120),
+        'PI446': (50, 200),
+    }
 
     bounds = []
-    for v in selected_vars:
-        val = input_vals[v]
-        if pd.isna(val):
-            raise ValueError(f"La variable {v} contient une valeur NaN, impossible d’optimiser.")
-        if val == 0:
-            bounds.append((-1, 1))
+    for var in selected_vars:
+        if var in custom_bounds:
+            bounds.append(custom_bounds[var])
         else:
-            bounds.append((val * (1 - var_range), val * (1 + var_range)))
+            v = input_vals[var]
+            bounds.append((v * 0.7, v * 1.3) if v != 0 else (-1, 1))
 
     def obj(x):
         tmp = input_vals.copy()
-        tmp[selected_vars] = x
-        pred = model.predict(pd.DataFrame([tmp]))[0]
+        for i, var in enumerate(selected_vars):
+            tmp[var] = x[i]
+        df_tmp = pd.DataFrame([tmp])[expected_cols]
+        pred = model.predict(df_tmp)[0]
         return abs(pred - target)
 
-    res = opt.differential_evolution(obj, bounds, maxiter=50, polish=True)
+    res = opt.differential_evolution(obj, bounds, maxiter=50, polish=True, workers=1)
     return pd.Series(res.x, index=selected_vars), res.fun
 
 # --- En-tête ---

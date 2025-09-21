@@ -14,6 +14,7 @@ st.set_page_config(layout="wide")
 # --- Choix de l’échelon ---
 st.sidebar.header("⚙️ Paramètres")
 echelon = st.sidebar.selectbox("Sélectionnez l’échelon :", ["J", "K", "L"])
+force_reload = st.sidebar.button("🔄 Recharger le modèle")
 
 # --- Définir le modèle et les features en fonction de l’échelon ---
 MODEL_URLS = {
@@ -48,7 +49,7 @@ FEATURES = {
         'PI428': 1.865,
         'TI444': 103.125,
         'PI446': 133.85,
-        'ACP29% entré Echelons': 1260.0,  # UI envoie ce nom
+        'ACP29% entré Echelons': 1260.0,
         'Heure_float': 7.00
     }
 }
@@ -62,16 +63,24 @@ def load_model(url, local_filename):
             response.raise_for_status()
             with open(local_filename, "wb") as f:
                 f.write(response.content)
-    try:
-        with open(local_filename, "rb") as f:
-            model = joblib.load(f)
-    except Exception as e:
-        st.error(f"❌ Échec du chargement du modèle : {e}")
-        st.stop()
-    return model
+    with open(local_filename, "rb") as f:
+        return joblib.load(f)
 
 model_url = MODEL_URLS[echelon]
 local_path = os.path.basename(model_url)
+
+# 🔧 Si on force, on nettoie le cache et on supprime le fichier local
+if force_reload:
+    try:
+        st.cache_resource.clear()
+    except Exception:
+        pass
+    try:
+        if os.path.exists(local_path):
+            os.remove(local_path)
+    except Exception as e:
+        st.warning(f"Impossible de supprimer {local_path} : {e}")
+
 best_model = load_model(model_url, local_path)
 
 # --- Harmonisation ACP29 ---
@@ -79,11 +88,9 @@ def harmonize_acp29_column(input_df: pd.DataFrame, expected_cols: list) -> pd.Da
     if "ACP29%" in expected_cols and "ACP29%" not in input_df.columns:
         if "ACP29% entré Echelons" in input_df.columns:
             input_df["ACP29%"] = input_df["ACP29% entré Echelons"]
-
     if "ACP29% entré Echelons" in expected_cols and "ACP29% entré Echelons" not in input_df.columns:
         if "ACP29%" in input_df.columns:
             input_df["ACP29% entré Echelons"] = input_df["ACP29%"]
-
     return input_df
 
 # --- Features et valeurs par défaut selon l’échelon ---
@@ -114,6 +121,11 @@ def optimize_selected(input_vals, target, model, selected_vars, var_range=0.3):
 
     res = opt.differential_evolution(obj, bounds, maxiter=50, polish=True)
     return pd.Series(res.x, index=selected_vars), res.fun
+
+# --- Afficher les features attendues (diagnostic) ---
+if hasattr(best_model, "feature_names_in_"):
+    st.sidebar.caption("🧩 Colonnes attendues par le modèle :")
+    st.sidebar.write(sorted(list(best_model.feature_names_in_)))
 
 # --- En-tête ---
 st.markdown(f"""

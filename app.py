@@ -48,7 +48,7 @@ FEATURES = {
         'PI428': 1.865,
         'TI444': 103.125,
         'PI446': 133.85,
-        'ACP29% entré Echelons': 1260.0,
+        'ACP29% entré Echelons': 1260.0,  # UI envoie ce nom
         'Heure_float': 7.00
     }
 }
@@ -62,8 +62,13 @@ def load_model(url, local_filename):
             response.raise_for_status()
             with open(local_filename, "wb") as f:
                 f.write(response.content)
-    with open(local_filename, "rb") as f:
-        return joblib.load(f)
+    try:
+        with open(local_filename, "rb") as f:
+            model = joblib.load(f)
+    except Exception as e:
+        st.error(f"❌ Échec du chargement du modèle : {e}")
+        st.stop()
+    return model
 
 model_url = MODEL_URLS[echelon]
 local_path = os.path.basename(model_url)
@@ -74,9 +79,11 @@ def harmonize_acp29_column(input_df: pd.DataFrame, expected_cols: list) -> pd.Da
     if "ACP29%" in expected_cols and "ACP29%" not in input_df.columns:
         if "ACP29% entré Echelons" in input_df.columns:
             input_df["ACP29%"] = input_df["ACP29% entré Echelons"]
+
     if "ACP29% entré Echelons" in expected_cols and "ACP29% entré Echelons" not in input_df.columns:
         if "ACP29%" in input_df.columns:
             input_df["ACP29% entré Echelons"] = input_df["ACP29%"]
+
     return input_df
 
 # --- Features et valeurs par défaut selon l’échelon ---

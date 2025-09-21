@@ -14,7 +14,6 @@ st.set_page_config(layout="wide")
 # --- Choix de l’échelon ---
 st.sidebar.header("⚙️ Paramètres")
 echelon = st.sidebar.selectbox("Sélectionnez l’échelon :", ["J", "K", "L"])
-force_reload = st.sidebar.button("🔄 Recharger le modèle")
 
 # --- Définir le modèle et les features en fonction de l’échelon ---
 MODEL_URLS = {
@@ -68,19 +67,6 @@ def load_model(url, local_filename):
 
 model_url = MODEL_URLS[echelon]
 local_path = os.path.basename(model_url)
-
-# 🔧 Si on force, on nettoie le cache et on supprime le fichier local
-if force_reload:
-    try:
-        st.cache_resource.clear()
-    except Exception:
-        pass
-    try:
-        if os.path.exists(local_path):
-            os.remove(local_path)
-    except Exception as e:
-        st.warning(f"Impossible de supprimer {local_path} : {e}")
-
 best_model = load_model(model_url, local_path)
 
 # --- Harmonisation ACP29 ---
@@ -121,11 +107,6 @@ def optimize_selected(input_vals, target, model, selected_vars, var_range=0.3):
 
     res = opt.differential_evolution(obj, bounds, maxiter=50, polish=True)
     return pd.Series(res.x, index=selected_vars), res.fun
-
-# --- Afficher les features attendues (diagnostic) ---
-if hasattr(best_model, "feature_names_in_"):
-    st.sidebar.caption("🧩 Colonnes attendues par le modèle :")
-    st.sidebar.write(sorted(list(best_model.feature_names_in_)))
 
 # --- En-tête ---
 st.markdown(f"""

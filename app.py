@@ -1,7 +1,6 @@
 import streamlit as st
 import numpy as np
 import pandas as pd
-import pickle
 import scipy.optimize as opt
 import os
 import requests
@@ -34,7 +33,7 @@ FEATURES = {
         'ACP29% entré Echelons': 1260.0,
         'Heure_float': 7.00
     },
-    "K": {
+    "K": {  # ✅ 3xx, pas de FIC
         'TIC323': 74.825,
         'PI326': -0.03,
         'PI328': 1.865,
@@ -43,13 +42,13 @@ FEATURES = {
         'ACP29% entré Echelons': 1260.0,
         'Heure_float': 7.00
     },
-    "L": {
+    "L": {  # ✅ 4xx
         'TIC423': 74.825,
         'PI426': -0.03,
         'PI428': 1.865,
         'TI444': 103.125,
         'PI446': 133.85,
-        'ACP29% entré Echelons': 1260.0,
+        'ACP29% entré Echelons': 1260.0,  # UI envoie ce nom
         'Heure_float': 7.00
     }
 }
@@ -75,15 +74,37 @@ model_url = MODEL_URLS[echelon]
 local_path = os.path.basename(model_url)
 best_model = load_model(model_url, local_path)
 
+# --- Harmonisation ACP29 ---
+def harmonize_acp29_column(input_df: pd.DataFrame, expected_cols: list) -> pd.DataFrame:
+    if "ACP29%" in expected_cols and "ACP29%" not in input_df.columns:
+        if "ACP29% entré Echelons" in input_df.columns:
+            input_df["ACP29%"] = input_df["ACP29% entré Echelons"]
+
+    if "ACP29% entré Echelons" in expected_cols and "ACP29% entré Echelons" not in input_df.columns:
+        if "ACP29%" in input_df.columns:
+            input_df["ACP29% entré Echelons"] = input_df["ACP29%"]
+
+    return input_df
+
 # --- Features et valeurs par défaut selon l’échelon ---
 DEFAULT_INPUTS = FEATURES[echelon]
 DISPLAY_FEATURES = list(DEFAULT_INPUTS.keys())
-OPTIMIZABLE = [f for f in DISPLAY_FEATURES if f not in ['ACP29% entré Echelons', 'Heure_float']]
+OPTIMIZABLE = [f for f in DISPLAY_FEATURES if f not in ['ACP29% entré Echelons', 'ACP29%', 'Heure_float']]
 
 # --- Optimisation ---
 def optimize_selected(input_vals, target, model, selected_vars, var_range=0.3):
-    bounds = [(v * (1 - var_range), v * (1 + var_range)) if v != 0 else (-1, 1)
-              for v in input_vals[selected_vars]]
+    if not selected_vars:
+        raise ValueError("Aucune variable sélectionnée pour l’optimisation.")
+
+    bounds = []
+    for v in selected_vars:
+        val = input_vals[v]
+        if pd.isna(val):
+            raise ValueError(f"La variable {v} contient une valeur NaN, impossible d’optimiser.")
+        if val == 0:
+            bounds.append((-1, 1))
+        else:
+            bounds.append((val * (1 - var_range), val * (1 + var_range)))
 
     def obj(x):
         tmp = input_vals.copy()
@@ -128,6 +149,10 @@ if submit_pred:
     input_df = pd.DataFrame([user_display])
     if hasattr(best_model, 'feature_names_in_'):
         expected_cols = list(best_model.feature_names_in_)
+
+        # ✅ Harmonisation des noms ACP29
+        input_df = harmonize_acp29_column(input_df, expected_cols)
+
         missing_cols = set(expected_cols) - set(input_df.columns)
         if missing_cols:
             st.error(f"⛔ Erreur : colonnes manquantes dans l'entrée : {missing_cols}")
@@ -154,30 +179,33 @@ if 'pred' in st.session_state:
         submit_opt = st.form_submit_button("Optimiser les variables")
 
     if submit_opt:
-        with st.spinner("🔄 Optimisation en cours... cela peut prendre quelques secondes"):
-            progress_bar = st.progress(0)
-            for percent_complete in range(0, 100, 10):
-                time.sleep(0.05)
-                progress_bar.progress(percent_complete + 10)
+        if not opt_selected_display:
+            st.error("⛔ Merci de sélectionner au moins une variable à optimiser.")
+        else:
+            with st.spinner("🔄 Optimisation en cours... cela peut prendre quelques secondes"):
+                progress_bar = st.progress(0)
+                for percent_complete in range(0, 100, 10):
+                    time.sleep(0.05)
+                    progress_bar.progress(percent_complete + 10)
 
-            base = st.session_state.input_df.iloc[0]
-            opt_vals, err = optimize_selected(base, target, best_model, opt_selected_display)
-            progress_bar.empty()
+                base = st.session_state.input_df.iloc[0]
+                opt_vals, err = optimize_selected(base, target, best_model, opt_selected_display)
+                progress_bar.empty()
 
-        df_out = pd.DataFrame({
-            'Variable': opt_selected_display,
-            'Valeur actuelle': base[opt_selected_display].values,
-            'Ajustement brut': opt_vals.values
-        })
+            df_out = pd.DataFrame({
+                'Variable': opt_selected_display,
+                'Valeur actuelle': base[opt_selected_display].values,
+                'Ajustement brut': opt_vals.values
+            })
 
-        def with_arrow(row):
-            delta = row['Ajustement brut'] - row['Valeur actuelle']
-            icon = "🔼" if delta > 0 else "🔽" if delta < 0 else "⏺️"
-            return f"{icon} {row['Ajustement brut']:.2f}"
+            def with_arrow(row):
+                delta = row['Ajustement brut'] - row['Valeur actuelle']
+                icon = "🔼" if delta > 0 else "🔽" if delta < 0 else "⏺️"
+                return f"{icon} {row['Ajustement brut']:.2f}"
 
-        df_out['Ajustement proposé'] = df_out.apply(with_arrow, axis=1)
-        df_out.drop(columns=['Ajustement brut'], inplace=True)
+            df_out['Ajustement proposé'] = df_out.apply(with_arrow, axis=1)
+            df_out.drop(columns=['Ajustement brut'], inplace=True)
 
-        st.subheader("Ajustements proposés")
-        st.table(df_out)
-        st.info(f"Ecart final |prédiction–cible| : {err:.2f}")
+            st.subheader("Ajustements proposés")
+            st.table(df_out)
+            st.info(f"Ecart final |prédiction–cible| : {err:.2f}")
